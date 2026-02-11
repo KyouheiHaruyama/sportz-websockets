@@ -3,6 +3,7 @@ import 'dotenv/config';
 import { db } from './db/db.js';
 import { eq } from 'drizzle-orm';
 import {matchRouter} from "./routes/matches.js";
+import { users } from './db/schema.js';
 
 const app = express();
 const port = process.env.PORT ? Number(process.env.PORT) : 8000;
@@ -25,7 +26,8 @@ app.post('/users', async (req, res) => {
     const inserted = await db.insert(users).values({ name, email }).returning();
     res.status(201).json(inserted[0]);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('Failed to create user:', err);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -35,7 +37,8 @@ app.get('/users', async (_req, res) => {
     const all = await db.select().from(users);
     res.json(all);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('Failed to list users:', err);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -50,7 +53,8 @@ app.get('/users/:id', async (req, res) => {
     if (!row) return res.status(404).json({ error: 'ユーザーが見つかりません' });
     res.json(row);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('Failed to get user:', err);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -71,7 +75,8 @@ app.put('/users/:id', async (req, res) => {
     if (updated.length === 0) return res.status(404).json({ error: 'ユーザーが見つかりません' });
     res.json(updated[0]);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('Failed to update user:', err);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -85,7 +90,8 @@ app.delete('/users/:id', async (req, res) => {
     if (deleted.length === 0) return res.status(404).json({ error: 'ユーザーが見つかりません' });
     res.json({ deleted: deleted[0] });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('Failed to delete user:', err);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 

@@ -35,7 +35,7 @@ export const createMatchSchema = z.object({
     const end = new Date(val.endTime);
     if (!(end > start)) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: 'custom',
         message: 'endTime must be after startTime',
         path: ['endTime'],
       });

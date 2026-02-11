@@ -1,6 +1,5 @@
 import { Router } from 'express';
 import {createMatchSchema, listMatchesQuerySchema} from "../validation/matches.js";
-import * as events from "node:events";
 import {db} from "../db/db.js";
 import {matches} from "../db/schema.js";
 import {getMatchStatus} from "../utils/match-status.js";
@@ -13,7 +12,7 @@ const MAX_LIMIT = 100;
 matchRouter.get("/", async (req, res) => {
     const parsed = listMatchesQuerySchema.safeParse(req.query);
     if (!parsed.success) {
-        return res.status(400).json({ error: "Invalid query", details: JSON.stringify(parsed.error) });
+        return res.status(400).json({ error: "Invalid query", details: { message: parsed.error.message, issues: parsed.error.issues } });
     }
 
     const limit = Math.min(parsed.data.limit ?? 50, MAX_LIMIT);
@@ -27,30 +26,35 @@ matchRouter.get("/", async (req, res) => {
 
         return res.json({ data });
     } catch (err) {
-        return res.status(500).json({ error: "Failed to list matches", details: JSON.stringify(err) });
+        console.error('Failed to list matches:', err);
+        return res.status(500).json({ error: "Failed to list matches", details: { message: err?.message, stack: err?.stack } });
     }
 })
 
 matchRouter.post("/", async (req, res) => {
     const parsed = createMatchSchema.safeParse(req.body);
     if (!parsed.success) {
-        return res.status(400).json({ error: "Invalid payload", details: JSON.stringify(parsed.error) });
+        return res.status(400).json({ error: "Invalid payload", details: { message: parsed.error.message, issues: parsed.error.issues } });
     }
 
     const { data: { startTime, endTime, homeScore, awayScore } } = parsed;
 
     try {
+        const computedStatus = getMatchStatus(startTime, endTime);
+        const statusSafe = computedStatus ?? 'scheduled';
+
         const [event] = await db.insert(matches).values({
             ...parsed.data,
             startTime: new Date(startTime),
             endTime: new Date(endTime),
             homeScore: homeScore ?? 0,
             awayScore: awayScore ?? 0,
-            status: getMatchStatus(startTime, endTime)
+            status: statusSafe
         }).returning();
 
         return res.status(201).json({ data: event });
     } catch (err) {
-        res.status(500).json({ error: "Failed to create match", details: JSON.stringify(err) });
+        console.error('Failed to create match:', err);
+        res.status(500).json({ error: "Failed to create match", details: { message: err?.message, stack: err?.stack } });
     }
 })
