@@ -7,10 +7,11 @@ function sendJson(socket, payload) {
 }
 
 function broadcast(wss, payload) {
+    // Serialize once to avoid repeated JSON.stringify during iteration
+    const serialized = JSON.stringify(payload);
     for (const client of wss.clients) {
-        if (client.readyState !== WebSocket.OPEN) return;
-
-        client.send(JSON.stringify(payload));
+        if (client.readyState !== WebSocket.OPEN) continue;
+        client.send(serialized);
     }
 }
 
