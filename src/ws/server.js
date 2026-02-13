@@ -24,7 +24,7 @@ function unsubscribe(socket, matchId) {
 
 function cleanupSubscriptions(socket) {
     for(const matchId of socket.subscriptions) {
-        unsubscribe(matchId, socket);
+        unsubscribe(socket, matchId);
     }
 }
 
@@ -63,6 +63,7 @@ function handleMessage(socket, data) {
         message = JSON.parse(data.toString());
     } catch (err) {
         sendJson(socket, { type: 'error', message: 'Invalid JSON' });
+        return;
     }
 
     if (message?.type === 'subscribe' && Number.isInteger(message.matchId)) {
@@ -124,14 +125,14 @@ export function attachWebSocketServer(server) {
             handleMessage(socket, data)
         });
 
-        socket.on('error', () => {
+        socket.on('error', (err) => {
+            console.error('WebSocket Error', err);
             socket.terminate()
         });
 
         socket.on('close', () => {
             cleanupSubscriptions(socket);
         });
-        socket.on('error', console.error);
     });
 
     const interval = setInterval(() => {

@@ -5,13 +5,7 @@ export const listCommentaryQuerySchema = z.object({
   limit: z.coerce.number().int().positive().max(100).optional(),
 });
 
-// Create commentary payload
-// - minute: coerced non-negative integer (e.g., 0..n)
-// - sequence: coerced non-negative integer used for ordering within the same minute
-// - period, eventType, actor, team: required non-empty strings
-// - message: required non-empty string
-// - metadata: record of arbitrary values
-// - tags: array of strings
+// Create a commentary payload
 export const createCommentarySchema = z.object({
   minute: z.coerce.number().int().nonnegative(),
   sequence: z.coerce.number().int().optional(),
