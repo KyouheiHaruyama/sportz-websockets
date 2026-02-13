@@ -3,6 +3,7 @@ import 'dotenv/config';
 import { db } from './db/db.js';
 import { eq } from 'drizzle-orm';
 import {matchRouter} from "./routes/matches.js";
+import {commentaryRouter} from "./routes/commentary.js";
 import { users } from './db/schema.js';
 import http from 'http';
 import {attachWebSocketServer} from "./ws/server.js";
@@ -17,8 +18,9 @@ const server = http.createServer(app);
 // JSONミドルウェア
 app.use(express.json());
 
-const { broadcastMatchCreated } = attachWebSocketServer(server);
+const { broadcastMatchCreated, broadcastCommentary } = attachWebSocketServer(server);
 app.locals.broadcastMatchCreated = broadcastMatchCreated;
+app.locals.broadcastCommentary = broadcastCommentary;
 
 // ルートGET: 稼働確認
 app.get('/', (_req, res) => {
@@ -107,7 +109,7 @@ app.delete('/users/:id', async (req, res) => {
 });
 
 app.use('/matches', matchRouter);
-// app.use('/matches/:id/commentary', commentaryRouter);
+app.use('/matches', commentaryRouter);
 
 // const { broadcastMatchCreated, broadcastCommentary } = attachWebSocketServer(server);
 // app.locals.broadcastMatchCreated = broadcastMatchCreated;

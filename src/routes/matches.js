@@ -26,8 +26,8 @@ matchRouter.get("/", async (req, res) => {
 
         return res.json({ data });
     } catch (err) {
-        console.error('Failed to list matches:', err);
-        return res.status(500).json({ error: "Failed to list matches", details: { message: err?.message, stack: err?.stack } });
+        console.error(`Failed to list matches: ${err}, stack: ${err?.stack}`);
+        return res.status(500).json({ error: "Failed to list matches", details: { message: err?.message } });
     }
 })
 
@@ -58,7 +58,7 @@ matchRouter.post("/", async (req, res) => {
 
         return res.status(201).json({ data: event });
     } catch (err) {
-        console.error('Failed to create match:', err);
-        res.status(500).json({ error: "Failed to create match", details: { message: err?.message, stack: err?.stack } });
+        console.error(`Failed to create match: ${err}, stack: ${err?.stack}`);
+        res.status(500).json({ error: "Failed to create match", details: { message: err?.message } });
     }
 })
