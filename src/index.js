@@ -6,6 +6,7 @@ import {matchRouter} from "./routes/matches.js";
 import { users } from './db/schema.js';
 import http from 'http';
 import {attachWebSocketServer} from "./ws/server.js";
+import {securityMiddleware} from "./arcjet.js";
 
 const PORT = process.env.PORT ? Number(process.env.PORT) : 8000;
 const HOST = process.env.HOST || '0.0.0.0';
@@ -23,6 +24,8 @@ app.locals.broadcastMatchCreated = broadcastMatchCreated;
 app.get('/', (_req, res) => {
   res.send('Neon + Drizzle + Express API is running.');
 });
+
+app.use(securityMiddleware());
 
 // Create: ユーザー作成
 app.post('/users', async (req, res) => {
